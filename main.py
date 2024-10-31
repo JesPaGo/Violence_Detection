@@ -36,8 +36,8 @@ test_transform = transforms.Compose([
 
 ###################################################################################################################################################################################
 
-train_ds =  SalientSuperImage(root_dir='/home/toluwani/Desktop/SIViDet/Dataset/SCVD/Train', num_secs=1, k=12, sampler='uniform', aspect_ratio='480p_A', grid_shape=(4,3), transform=train_transform)
-test_ds =  SalientSuperImage(root_dir='/home/toluwani/Desktop/SIViDet/Dataset/SCVD/Test', num_secs=1, k=12, sampler='uniform', aspect_ratio='480p_A', grid_shape=(4,3), transform=test_transform)
+train_ds =  SalientSuperImage(root_dir='/home/jparejo/projects/VD/SaliNet/dataset/SCVD/SCVD_converted_sec_split/Train', num_secs=1, k=12, sampler='uniform', aspect_ratio='480p_A', grid_shape=(4,3), transform=train_transform)
+test_ds =  SalientSuperImage(root_dir='/home/jparejo/projects/VD/SaliNet/dataset/SCVD/SCVD_converted_sec_split/Test', num_secs=1, k=12, sampler='uniform', aspect_ratio='480p_A', grid_shape=(4,3), transform=test_transform)
 
 batch_size = 32
 
@@ -123,7 +123,7 @@ def main(model, train_loader, test_loader, n_epochs=100, num_classes=3):
                 val_loss += ce_loss(scores, targets).item()
 
                 # Convert targets to binary format using one-hot encoding
-                targets_onehot = torch.eye(num_classes)[targets]
+                targets_onehot = torch.eye(num_classes, device=device)[targets]
 
                 # Append true and predicted labels for computing average precision
                 for i in range(num_classes):
@@ -142,7 +142,7 @@ def main(model, train_loader, test_loader, n_epochs=100, num_classes=3):
         # Compute mean average precision (mAP) over all classes
         mAP = (np.mean(ap)) * 100
         # Print epoch results and save best model
-        save_path = f"weights/{type(model).__name__}.pth"
+        save_path = f"weights/{type(model).__name__}-2.pth"
         if mAP > avgpr and val_acc > best_accuracy:
 
             torch.save(model.state_dict(), save_path)
@@ -168,5 +168,5 @@ model = SalientClassifier(salinet_arch="salinet2m", num_classes=3)
 pytorch_total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print(pytorch_total_params)
 
-model, best_loss, best_accuracy, avgpr = main(model, train_loader, test_loader, num_classes=3, n_epochs=30)
+model, best_loss, best_accuracy, avgpr = main(model, train_loader, test_loader, num_classes=3, n_epochs=3)
 print(best_loss, best_accuracy, avgpr)
